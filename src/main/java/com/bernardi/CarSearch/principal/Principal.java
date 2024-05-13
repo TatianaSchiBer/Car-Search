@@ -1,10 +1,15 @@
 package com.bernardi.CarSearch.principal;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 import com.bernardi.CarSearch.model.Dati;
 import com.bernardi.CarSearch.model.Modelli;
+import com.bernardi.CarSearch.model.Veicolo;
 import com.bernardi.CarSearch.service.ConsumoAPI;
 import com.bernardi.CarSearch.service.ConverteDati;
 
@@ -67,6 +72,40 @@ public class Principal {
 		modelloLista.modelli().stream()
 						.sorted(Comparator.comparing(Dati::codice))
 						.forEach(System.out::println);
+		
+		System.out.println("\nDigitare un pezzo del nome del veicolo che si desidera cercare:");
+		
+		var nomeVeicolo = scanner.nextLine();
+		
+		List<Dati> modelliFiltrati = modelloLista.modelli().stream()
+						.filter(m -> m.nome().toLowerCase().contains(nomeVeicolo.toLowerCase()))
+						.collect(Collectors.toList());
+		
+		System.out.println("\nModelli Filtrati: ");
+		modelliFiltrati.forEach(System.out::println);
+		
+		System.out.println("\ninserire il codice del modello da consultare: ");
+		
+		var codiceModello = scanner.nextLine();
+		
+		indirizzo = indirizzo + "/" + codiceModello + "/anos";
+		json = consumo.getData(indirizzo);
+		
+		List<Dati> anni = convertitore.getList(json, Dati.class);
+		List<Veicolo> veicoli = new ArrayList<>();
+		
+		for(int i = 0; i < anni.size(); i++) {
+			var indirizzoAnni = indirizzo + "/" + anni.get(i).codice();
+			json = consumo.getData(indirizzoAnni);
+			Veicolo veicolo = convertitore.getData(json, Veicolo.class);
+			veicoli.add(veicolo);
+			
+		
+		}
+		System.out.println("Ecco l'elenco con il modello di veicolo per anno: ");
+		veicoli.forEach(System.out::println);
+		
+		
 		
 	}
 }
